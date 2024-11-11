@@ -23,7 +23,6 @@ public class CreateIndex {
     public static void main(String[] args) throws IOException {
         String analyzerType = args.length > 0 ? args[0] : "standard";  // Default to standard analyzer
 
-        // Initialize appropriate analyzer
         Analyzer analyzer = new StandardAnalyzer();
         if (analyzerType.equalsIgnoreCase("whitespace")) {
             analyzer = new WhitespaceAnalyzer();
@@ -31,33 +30,36 @@ public class CreateIndex {
             analyzer = new EnglishAnalyzer();
         }
 
-        // Set index directory based on analyzer type
         String indexDirectory = "./" + analyzerType + "_index";
         Directory directory = FSDirectory.open(Paths.get(indexDirectory));
 
-        // Configure the IndexWriter
         IndexWriterConfig config = new IndexWriterConfig(analyzer);
         config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
         IndexWriter iwriter = new IndexWriter(directory, config);
 
-        // Parse the documents using FtParser and get a list of FtDoc objects
-        List<FtDoc> ftDocs = FtParse.parse_ft();
+        // List to hold all document parsers
+        List<DocumentParser> parsers = new ArrayList<>();
+        parsers.add(new FtParse());
+        // parsers.add(new AnotherDocParser());  // Add other parsers as needed
 
-        // Convert FtDoc objects to Lucene Document objects and add to the index
         List<Document> documents = new ArrayList<>();
-        for (FtDoc ftDoc : ftDocs) {
-            Document doc = new Document();
-            doc.add(new StringField("docNo", ftDoc.getDocNo(), Field.Store.YES));          // Document ID
-            doc.add(new TextField("headline", ftDoc.getHeadline(), Field.Store.YES));      // Headline
-            doc.add(new TextField("textBody", ftDoc.getTextBody(), Field.Store.YES));      // Main text content
 
-            documents.add(doc);
+        // Iterate over each parser to parse and index documents
+        for (DocumentParser parser : parsers) {
+            List<ParsedDoc> parsedDocs = parser.parse();
+
+            for (ParsedDoc parsedDoc : parsedDocs) {
+                Document doc = new Document();
+                doc.add(new StringField("docNo", parsedDoc.getDocNo(), Field.Store.YES));
+                doc.add(new TextField("headline", parsedDoc.getHeadline(), Field.Store.YES));
+                doc.add(new TextField("textBody", parsedDoc.getTextBody(), Field.Store.YES));
+
+                documents.add(doc);
+            }
         }
 
-        // Add all documents to the index
         iwriter.addDocuments(documents);
 
-        // Close the writer and directory
         iwriter.close();
         directory.close();
 
