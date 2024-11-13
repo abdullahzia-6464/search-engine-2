@@ -18,7 +18,7 @@ Replace `english` with `whitespace` or `standard` depending on the desired analy
 - You can query the index using different similarity models (vsm, bm25, boolean, lmd) and analyzers (standard, whitespace, english). You can run the query in batch mode (for running all queries) or interactive mode (for manual input).
 
 ```bash
-mvn exec:java -Dexec.mainClass="com.example.QueryIndex" -Dexec.args="interactive vsm standard"
+mvn exec:java -Dexec.mainClass="com.example.QueryIndex" -Dexec.args="interactive vsm english"
 ```
 
 - Replace `interactive` with `batch` for batch mode. **(TO BE IMPLEMENTED)**
