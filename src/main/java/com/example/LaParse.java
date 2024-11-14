@@ -27,6 +27,7 @@ public class LaParse implements DocumentParser {
             files1.add(files.getAbsolutePath());
         }
         int count = 0;
+        System.out.println("Parsing LA times");
         for (String f : files1) {
             try {
                 File input = new File(f);

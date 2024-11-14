@@ -30,6 +30,7 @@ public class FtParse implements DocumentParser {
             }
         }
         int count = 0;
+        System.out.println("Parsing Financial Times");
         for (String f : files1) {
             try {
                 File input = new File(f);
