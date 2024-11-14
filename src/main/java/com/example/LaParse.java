@@ -9,26 +9,24 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class FtParse implements DocumentParser {
+public class LaParse implements DocumentParser {
 
-    private static int BATCH = 100;
+    private static int BATCH = 1000;
+
     @Override
     public List<ParsedDoc> parse() throws IOException {
         List<ParsedDoc> parsedDocs = new ArrayList<>();
 
-        File[] file = new File(Constants.DOCS_FILE_PATH + "/ft").listFiles();
+        File[] file = new File(Constants.DOCS_FILE_PATH + "/latimes").listFiles();
         if (file == null) {
-            throw new IOException("directory not found or empty: " + Constants.DOCS_FILE_PATH + "/ft");
+            throw new IOException("directory not found or empty: " + Constants.DOCS_FILE_PATH + "/latimes");
         }
         ArrayList<String> files1 = new ArrayList<>();
 
         for (File files : file) {
-            if (files.isDirectory()) {
-                for (File f : files.listFiles()) {
-                    files1.add(f.getAbsolutePath());
-                }
-            }
+            files1.add(f.getAbsolutePath());
         }
+        System.out.println("files to index: ",files1);
         int count = 0;
         for (String f : files1) {
             try {
@@ -50,13 +48,14 @@ public class FtParse implements DocumentParser {
 
                 if (count % BATCH == 0) {
                     System.out.println("processed batch of " + BATCH + " files.");
-                    parsedDocs.clear(); 
+                    parsedDocs.clear();  
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
+        }       
+           
 
-        return parsedDocs;
+     
     }
 }
