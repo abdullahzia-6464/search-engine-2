@@ -11,7 +11,7 @@ import org.jsoup.select.Elements;
 
 public class LaParse implements DocumentParser {
 
-    private static int BATCH = 1000;
+    private static int BATCH = 100;
 
     @Override
     public List<ParsedDoc> parse() throws IOException {
@@ -26,6 +26,7 @@ public class LaParse implements DocumentParser {
         for (File files : file) {
             files1.add(files.getAbsolutePath());
         }
+
         int count = 0;
         System.out.println("Parsing LA times");
         for (String f : files1) {
