@@ -24,9 +24,8 @@ public class LaParse implements DocumentParser {
         ArrayList<String> files1 = new ArrayList<>();
 
         for (File files : file) {
-            files1.add(f.getAbsolutePath());
+            files1.add(files.getAbsolutePath());
         }
-        System.out.println("files to index: ",files1);
         int count = 0;
         for (String f : files1) {
             try {
