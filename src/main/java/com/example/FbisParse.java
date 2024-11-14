@@ -45,11 +45,11 @@ public class FbisParse implements DocumentParser {
 
                     documents.add(luceneDoc);
 
-                    // If we have reached the batch size, add documents to index
+                    // batch processing
                     if (documents.size() >= BATCH_SIZE) {
                         iwriter.addDocuments(documents);
-                        iwriter.commit(); // Commit after each batch
-                        documents.clear(); // Clear list for the next batch
+                        iwriter.commit(); 
+                        documents.clear(); // clear list for the next batch
                         System.out.println("Indexed batch of " + BATCH_SIZE + " documents.");
                     }
                 }
@@ -58,7 +58,7 @@ public class FbisParse implements DocumentParser {
             }
         }
 
-        // Index remaining documents if any
+        // index remaining documents
         if (!documents.isEmpty()) {
             iwriter.addDocuments(documents);
             iwriter.commit();

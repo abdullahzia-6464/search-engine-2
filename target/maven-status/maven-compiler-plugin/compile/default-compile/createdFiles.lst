@@ -1,5 +1,6 @@
 com/example/Constants.class
 com/example/LaParse.class
+com/example/FbisParse.class
 com/example/App.class
 com/example/CreateIndex.class
 com/example/ParsedDoc.class

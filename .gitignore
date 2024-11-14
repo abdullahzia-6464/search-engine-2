@@ -3,3 +3,5 @@ docs/
 .vscode/
 topics
 results/
+trec_eval-9.0.7/
+qrels.assignment2.part1
