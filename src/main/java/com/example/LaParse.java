@@ -15,7 +15,7 @@ import org.jsoup.select.Elements;
 
 public class LaParse implements DocumentParser {
 
-    private static final int BATCH_SIZE = 100;
+    private static int BATCH_SIZE = 100;
 
     @Override
     public void parse(IndexWriter iwriter) throws IOException {
@@ -23,13 +23,10 @@ public class LaParse implements DocumentParser {
         if (files == null) {
             throw new IOException("Directory not found or empty: " + Constants.DOCS_FILE_PATH + "/latimes");
         }
-
-        for (File files : file) {
-            files1.add(files.getAbsolutePath());
-        }
-        int count = 0;
+  
         System.out.println("Parsing LA times");
-        for (String f : files1) {
+        ArrayList<Document> documents = new ArrayList<>();
+        for (File file : files) {
             try {
                 org.jsoup.nodes.Document jsoupDoc = Jsoup.parse(file, "UTF-8", "");
                 jsoupDoc.select("docid").remove();

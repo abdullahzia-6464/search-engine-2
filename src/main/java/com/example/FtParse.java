@@ -13,19 +13,19 @@ import org.jsoup.select.Elements;
 
 public class FtParse implements DocumentParser {
 
-    private static final int BATCH_SIZE = 100;
+    private static int BATCH_SIZE = 100;
 
     @Override
     public void parse(IndexWriter iwriter) throws IOException {
-        File[] fileDirs = new File(Constants.DOCS_FILE_PATH + "/ft").listFiles();
-        if (fileDirs == null) {
+        File[] files = new File(Constants.DOCS_FILE_PATH + "/ft").listFiles();
+        if (files == null) {
             throw new IOException("Directory not found or empty: " + Constants.DOCS_FILE_PATH + "/ft");
         }
 
         ArrayList<String> filesList = new ArrayList<>();
-        for (File dir : fileDirs) {
-            if (dir.isDirectory()) {
-                for (File f : dir.listFiles()) {
+        for (File file : files) {
+            if (file.isDirectory()) {
+                for (File f : file.listFiles()) {
                     filesList.add(f.getAbsolutePath());
                 }
             }
