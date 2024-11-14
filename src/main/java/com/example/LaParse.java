@@ -52,9 +52,7 @@ public class LaParse implements DocumentParser {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }       
-           
-
-     
+        }        
+        return parsedDocs;
     }
 }
