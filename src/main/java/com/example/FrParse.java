@@ -35,7 +35,7 @@ public class FrParse implements DocumentParser {
         }
 
         System.out.println("Parsing Federal Register documents...");
-        ArrayList<Document> luceneDocs = new ArrayList<>();
+        ArrayList<Document> documents = new ArrayList<>();
 
         // Parse each file in the filePaths list
         for (String filePath : filePaths) {
@@ -48,23 +48,23 @@ public class FrParse implements DocumentParser {
 
                 for (Element e : docs) {
                     String docNo = e.select("DOCNO").text().trim();
-                    String parentId = e.select("PARENT").text().trim();
+                    // String parentId = e.select("PARENT").text().trim();
                     String textBody = e.select("TEXT").text();
 
                     // Create a Lucene Document and add fields
                     Document luceneDoc = new Document();
                     luceneDoc.add(new StringField("docNo", docNo, Field.Store.YES));
-                    luceneDoc.add(new TextField("parentId", parentId, Field.Store.YES));
+                    // luceneDoc.add(new TextField("parentId", parentId, Field.Store.YES));
                     luceneDoc.add(new TextField("textBody", textBody, Field.Store.YES));
 
                     // Add document to batch
-                    luceneDocs.add(luceneDoc);
+                    documents.add(luceneDoc);
 
-                    // Check if batch size is reached
-                    if (luceneDocs.size() >= BATCH_SIZE) {
-                        iwriter.addDocuments(luceneDocs);
+                    // If batch size reached, add documents to index
+                    if (documents.size() >= BATCH_SIZE) {
+                        iwriter.addDocuments(documents);
                         iwriter.commit(); // Commit after each batch
-                        luceneDocs.clear(); // Clear batch for next set of documents
+                        documents.clear(); // Clear batch for next set of documents
                         System.out.println("Indexed batch of " + BATCH_SIZE + " documents.");
                     }
                 }
@@ -74,10 +74,10 @@ public class FrParse implements DocumentParser {
         }
 
         // Add any remaining documents in the final batch
-        if (!luceneDocs.isEmpty()) {
-            iwriter.addDocuments(luceneDocs);
+        if (!documents.isEmpty()) {
+            iwriter.addDocuments(documents);
             iwriter.commit();
-            System.out.println("Indexed remaining " + luceneDocs.size() + " documents.");
+            System.out.println("Indexed remaining " + documents.size() + " documents.");
         }
     }
 }

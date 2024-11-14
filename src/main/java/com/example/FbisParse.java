@@ -13,18 +13,18 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class LaParse implements DocumentParser {
+public class FbisParse implements DocumentParser {
 
     private static int BATCH_SIZE = 100;
 
     @Override
     public void parse(IndexWriter iwriter) throws IOException {
-        File[] files = new File(Constants.DOCS_FILE_PATH + "/latimes").listFiles();
+        File[] files = new File(Constants.DOCS_FILE_PATH + "/fbis").listFiles();
         if (files == null) {
-            throw new IOException("Directory not found or empty: " + Constants.DOCS_FILE_PATH + "/latimes");
+            throw new IOException("Directory not found or empty: " + Constants.DOCS_FILE_PATH + "/fbis");
         }
   
-        System.out.println("Parsing LA times");
+        System.out.println("Parsing FBIS");
         ArrayList<Document> documents = new ArrayList<>();
         for (File file : files) {
             try {
@@ -45,7 +45,7 @@ public class LaParse implements DocumentParser {
 
                     documents.add(luceneDoc);
 
-                    // If batch size reached, add documents to index
+                    // If we have reached the batch size, add documents to index
                     if (documents.size() >= BATCH_SIZE) {
                         iwriter.addDocuments(documents);
                         iwriter.commit(); // Commit after each batch

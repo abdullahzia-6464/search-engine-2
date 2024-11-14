@@ -37,7 +37,8 @@ public class CreateIndex {
         List<DocumentParser> parsers = new ArrayList<>();
         parsers.add(new FtParse());
         parsers.add(new LaParse());
-        parsers.add(new FrParse()); // Adding LaParse, more can be added later
+        parsers.add(new FrParse()); 
+        parsers.add(new FbisParse());
 
         // Pass the IndexWriter to each parser
         for (DocumentParser parser : parsers) {

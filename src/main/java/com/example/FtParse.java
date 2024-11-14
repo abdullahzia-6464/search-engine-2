@@ -32,7 +32,7 @@ public class FtParse implements DocumentParser {
         }
 
         System.out.println("Parsing Financial Times");
-        ArrayList<Document> luceneDocsBatch = new ArrayList<>();
+        ArrayList<Document> documents = new ArrayList<>();
 
         for (String filePath : filesList) {
             try {
@@ -53,13 +53,13 @@ public class FtParse implements DocumentParser {
                     luceneDoc.add(new TextField("textBody", textBody, Field.Store.YES));
 
                     // Add to batch
-                    luceneDocsBatch.add(luceneDoc);
+                    documents.add(luceneDoc);
 
                     // Check if batch size is reached
-                    if (luceneDocsBatch.size() >= BATCH_SIZE) {
-                        iwriter.addDocuments(luceneDocsBatch);
+                    if (documents.size() >= BATCH_SIZE) {
+                        iwriter.addDocuments(documents);
                         iwriter.commit();
-                        luceneDocsBatch.clear();  // Clear the batch after indexing
+                        documents.clear();  // Clear the batch after indexing
                         System.out.println("Indexed batch of " + BATCH_SIZE + " documents.");
                     }
                 }
@@ -70,10 +70,10 @@ public class FtParse implements DocumentParser {
         }
 
         // Add any remaining documents in the final batch
-        if (!luceneDocsBatch.isEmpty()) {
-            iwriter.addDocuments(luceneDocsBatch);
+        if (!documents.isEmpty()) {
+            iwriter.addDocuments(documents);
             iwriter.commit();
-            System.out.println("Indexed final batch of " + luceneDocsBatch.size() + " documents.");
+            System.out.println("Indexed final batch of " + documents.size() + " documents.");
         }
     }
 }
