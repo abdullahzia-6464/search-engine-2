@@ -2,62 +2,78 @@ package com.example;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
-
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.IndexWriter;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class FtParse implements DocumentParser {
 
-    private static int BATCH = 100;
+    private static final int BATCH_SIZE = 100;
+
     @Override
-    public List<ParsedDoc> parse() throws IOException {
-        List<ParsedDoc> parsedDocs = new ArrayList<>();
-
-        File[] file = new File(Constants.DOCS_FILE_PATH + "/ft").listFiles();
-        if (file == null) {
-            throw new IOException("directory not found or empty: " + Constants.DOCS_FILE_PATH + "/ft");
+    public void parse(IndexWriter iwriter) throws IOException {
+        File[] fileDirs = new File(Constants.DOCS_FILE_PATH + "/ft").listFiles();
+        if (fileDirs == null) {
+            throw new IOException("Directory not found or empty: " + Constants.DOCS_FILE_PATH + "/ft");
         }
-        ArrayList<String> files1 = new ArrayList<>();
 
-        for (File files : file) {
-            if (files.isDirectory()) {
-                for (File f : files.listFiles()) {
-                    files1.add(f.getAbsolutePath());
+        ArrayList<String> filesList = new ArrayList<>();
+        for (File dir : fileDirs) {
+            if (dir.isDirectory()) {
+                for (File f : dir.listFiles()) {
+                    filesList.add(f.getAbsolutePath());
                 }
             }
         }
-        int count = 0;
+
         System.out.println("Parsing Financial Times");
-        for (String f : files1) {
+        ArrayList<Document> luceneDocsBatch = new ArrayList<>();
+
+        for (String filePath : filesList) {
             try {
-                File input = new File(f);
-                Document doc = Jsoup.parse(input, "UTF-8", "");
-                doc.select("docid").remove();
+                File inputFile = new File(filePath);
+                org.jsoup.nodes.Document jsoupDoc = Jsoup.parse(inputFile, "UTF-8", "");
+                jsoupDoc.select("docid").remove();
 
-                Elements docs = doc.select("doc");
-
+                Elements docs = jsoupDoc.select("doc");
                 for (Element e : docs) {
                     String docNo = e.getElementsByTag("DOCNO").text();
                     String headline = e.getElementsByTag("HEADLINE").text();
                     String textBody = e.getElementsByTag("TEXT").text();
 
-                    ParsedDoc parsedDoc = new ParsedDoc(docNo, headline, textBody);
-                    parsedDocs.add(parsedDoc);
-                }
-                count++;
+                    // Create a Lucene Document
+                    Document luceneDoc = new Document();
+                    luceneDoc.add(new StringField("docNo", docNo, Field.Store.YES));
+                    luceneDoc.add(new TextField("headline", headline, Field.Store.YES));
+                    luceneDoc.add(new TextField("textBody", textBody, Field.Store.YES));
 
-                if (count % BATCH == 0) {
-                    System.out.println("processed batch of " + BATCH + " files.");
-                    parsedDocs.clear(); 
+                    // Add to batch
+                    luceneDocsBatch.add(luceneDoc);
+
+                    // Check if batch size is reached
+                    if (luceneDocsBatch.size() >= BATCH_SIZE) {
+                        iwriter.addDocuments(luceneDocsBatch);
+                        iwriter.commit();
+                        luceneDocsBatch.clear();  // Clear the batch after indexing
+                        System.out.println("Indexed batch of " + BATCH_SIZE + " documents.");
+                    }
                 }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        return parsedDocs;
+        // Add any remaining documents in the final batch
+        if (!luceneDocsBatch.isEmpty()) {
+            iwriter.addDocuments(luceneDocsBatch);
+            iwriter.commit();
+            System.out.println("Indexed final batch of " + luceneDocsBatch.size() + " documents.");
+        }
     }
 }

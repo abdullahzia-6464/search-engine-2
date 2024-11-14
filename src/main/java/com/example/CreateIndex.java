@@ -9,10 +9,6 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
@@ -34,32 +30,18 @@ public class CreateIndex {
         Directory directory = FSDirectory.open(Paths.get(indexDirectory));
 
         IndexWriterConfig config = new IndexWriterConfig(analyzer);
-        config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+        config.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
         IndexWriter iwriter = new IndexWriter(directory, config);
 
         // List to hold all document parsers
         List<DocumentParser> parsers = new ArrayList<>();
         parsers.add(new FtParse());
-        parsers.add(new LaParse());
-        // parsers.add(new AnotherDocParser());  // Add other parsers as needed
+        //parsers.add(new LaParse()); // Adding LaParse, more can be added later
 
-        List<Document> documents = new ArrayList<>();
-
-        // Iterate over each parser to parse and index documents
+        // Pass the IndexWriter to each parser
         for (DocumentParser parser : parsers) {
-            List<ParsedDoc> parsedDocs = parser.parse();
-
-            for (ParsedDoc parsedDoc : parsedDocs) {
-                Document doc = new Document();
-                doc.add(new StringField("docNo", parsedDoc.getDocNo(), Field.Store.YES));
-                doc.add(new TextField("headline", parsedDoc.getHeadline(), Field.Store.YES));
-                doc.add(new TextField("textBody", parsedDoc.getTextBody(), Field.Store.YES));
-
-                documents.add(doc);
-            }
+            parser.parse(iwriter);
         }
-
-        iwriter.addDocuments(documents);
 
         iwriter.close();
         directory.close();

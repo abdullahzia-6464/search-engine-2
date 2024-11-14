@@ -1,8 +1,14 @@
 package com.example;
 
+import org.apache.lucene.index.IndexWriter;
 import java.io.IOException;
-import java.util.List;
 
 public interface DocumentParser {
-    List<ParsedDoc> parse() throws IOException;
+
+    /**
+     * Parses documents and adds them to the provided IndexWriter in batches.
+     * @param iwriter the IndexWriter used to index documents
+     * @throws IOException if an I/O error occurs during parsing or indexing
+     */
+    void parse(IndexWriter iwriter) throws IOException;
 }
