@@ -1,7 +1,9 @@
 package com.example;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Scanner;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -62,7 +64,7 @@ public class QueryIndex {
         // Run relevant search mode
         if ("batch".equalsIgnoreCase(searchMode)) {
             // Placeholder for batch search; implement this later
-            runBatchSearch(analyzer, isearcher);
+            runBatchSearch(analyzer, isearcher, analyzerType, similarityType);
         } else {
             runInteractiveSearch(analyzer, isearcher);
         }
@@ -105,8 +107,61 @@ public class QueryIndex {
         scanner.close();
     }
 
-    // Placeholder for batch search, to be implemented later
-    public static void runBatchSearch(Analyzer analyzer, IndexSearcher isearcher) throws IOException, ParseException {
-        System.out.println("Batch search functionality to be implemented.");
+    public static void runBatchSearch(Analyzer analyzer, IndexSearcher isearcher, String analyzerType, String similarityType) throws IOException, ParseException {
+        QueryParser parser = new QueryParser("textBody", analyzer);  // Adjusting field to "textBody"
+        
+        // Specify the path to the new queries file
+        String queryFilePath = "./py-script/queries.txt";
+        BufferedReader queryReader = new BufferedReader(new FileReader(queryFilePath));
+        
+        // Output path for the results file in TREC Eval format
+        String resultsPath = "./results/" + analyzerType + "_" + similarityType + "_results.txt";
+        BufferedWriter resultsWriter = Files.newBufferedWriter(
+            Paths.get(resultsPath), 
+            StandardOpenOption.CREATE, 
+            StandardOpenOption.TRUNCATE_EXISTING
+        );
+
+        String line;
+        while ((line = queryReader.readLine()) != null) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+
+            // Split query ID and query text based on tab separator
+            String[] parts = line.split("\t", 2);
+            int queryId = Integer.parseInt(parts[0]);
+            if (queryId > 425) break; // ONLY GENERATE RESULTS FOR FIRST HALF OF QUERIES FOR NOW
+            String queryText = parts[1];
+
+            // Process and execute the query
+            processQuery(queryId, queryText, parser, isearcher, resultsWriter);
+        }
+
+        // Close resources
+        queryReader.close();
+        resultsWriter.close();
+        System.out.println("Batch search completed. Results written to: " + resultsPath);
+    }
+
+    private static void processQuery(int queryId, String queryText, QueryParser parser, IndexSearcher isearcher, BufferedWriter resultsWriter) throws IOException, ParseException {
+        // Escape query text to handle special characters
+        String escapedQueryText = QueryParser.escape(queryText);
+
+        // Parse and execute the query
+        Query query = parser.parse(escapedQueryText);
+        TopDocs topDocs = isearcher.search(query, 1000);  // Retrieve top n results
+
+        // Write results in TREC Eval format:
+        // <query_id> Q0 <doc_id> <rank> <score> <run_name>
+        int rank = 1;
+        for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
+            Document doc = isearcher.doc(scoreDoc.doc);
+            String docId = doc.get("docNo");  // Match the field in your current document structure
+            
+            String resultLine = String.format("%d Q0 %s %d %f lucene-v2\n", queryId, docId, rank, scoreDoc.score);
+            resultsWriter.write(resultLine);
+
+            rank++;
+        }
     }
 }
