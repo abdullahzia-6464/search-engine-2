@@ -40,6 +40,7 @@ public class CreateIndex {
         // List to hold all document parsers
         List<DocumentParser> parsers = new ArrayList<>();
         parsers.add(new FtParse());
+        parsers.add(new FrParse());
         // parsers.add(new AnotherDocParser());  // Add other parsers as needed
 
         List<Document> documents = new ArrayList<>();
