@@ -1,0 +1,7 @@
+com/example/Constants.class
+com/example/App.class
+com/example/ParsedDoc.class
+com/example/CreateIndex.class
+com/example/QueryIndex.class
+com/example/FtParse.class
+com/example/DocumentParser.class
