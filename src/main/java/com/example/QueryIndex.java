@@ -34,11 +34,11 @@ public class QueryIndex {
         
         String indexDirectory = "./" + analyzerType + "_index";
 
-        Directory directory = FSDirectory.open(Paths.get(indexDirectory)); // Access index directory
+        Directory directory = FSDirectory.open(Paths.get(indexDirectory)); 
         DirectoryReader ireader = DirectoryReader.open(directory);
         IndexSearcher isearcher = new IndexSearcher(ireader);
 
-        // Choose the relevant analyzer according to argument passed
+        // choose analyzer according to argument passed
         Analyzer analyzer = new StandardAnalyzer();
         if(analyzerType.equalsIgnoreCase("whitespace")){
             analyzer = new WhitespaceAnalyzer(); 
@@ -46,7 +46,7 @@ public class QueryIndex {
             analyzer = new EnglishAnalyzer();
         }
 
-        // Set the similarity model for scoring
+        // choose the similarity model
         if ("bm25".equalsIgnoreCase(similarityType)) {
             isearcher.setSimilarity(new BM25Similarity());
             System.out.println("Using BM25 Similarity for searching");
@@ -61,22 +61,20 @@ public class QueryIndex {
             System.out.println("Using Classic (VSM) Similarity for searching");
         }
 
-        // Run relevant search mode
+        // run relevant search mode
         if ("batch".equalsIgnoreCase(searchMode)) {
-            // Placeholder for batch search; implement this later
             runBatchSearch(analyzer, isearcher, analyzerType, similarityType);
         } else {
             runInteractiveSearch(analyzer, isearcher);
         }
 
-        // Close resources
         ireader.close();
         directory.close();
     }
 
     private static void runInteractiveSearch(Analyzer analyzer, IndexSearcher isearcher) throws IOException, ParseException {
         Scanner scanner = new Scanner(System.in);
-        QueryParser parser = new QueryParser("textBody", analyzer);  // Assuming "textBody" is the main searchable field
+        QueryParser parser = new QueryParser("textBody", analyzer);
 
         System.out.println("Enter your search query (type 'exit' to quit):");
 
@@ -88,13 +86,13 @@ public class QueryIndex {
                 break;
             }
 
-            // Parse the query and search the index
+            // parse the query and search the index
             Query query = parser.parse(searchTerm);
-            TopDocs topDocs = isearcher.search(query, 10);  // Limit to top 10 results
+            TopDocs topDocs = isearcher.search(query, 10);  
 
             System.out.println("Found " + topDocs.totalHits + " results.");
 
-            // Display results
+            // display results
             for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
                 Document doc = isearcher.doc(scoreDoc.doc);
                 System.out.println("DocNo: " + doc.get("docNo"));
@@ -108,13 +106,12 @@ public class QueryIndex {
     }
 
     public static void runBatchSearch(Analyzer analyzer, IndexSearcher isearcher, String analyzerType, String similarityType) throws IOException, ParseException {
-        QueryParser parser = new QueryParser("textBody", analyzer);  // Adjusting field to "textBody"
+        QueryParser parser = new QueryParser("textBody", analyzer);  
         
-        // Specify the path to the new queries file
         String queryFilePath = "./py-script/queries.txt";
         BufferedReader queryReader = new BufferedReader(new FileReader(queryFilePath));
         
-        // Output path for the results file in TREC Eval format
+        // path for the results file in TREC Eval format
         String resultsPath = "./results/" + analyzerType + "_" + similarityType + "_results.txt";
         BufferedWriter resultsWriter = Files.newBufferedWriter(
             Paths.get(resultsPath), 
@@ -127,40 +124,38 @@ public class QueryIndex {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            // Split query ID and query text based on tab separator
+            // split query ID and query text 
             String[] parts = line.split("\t", 2);
             int queryId = Integer.parseInt(parts[0]);
             if (queryId > 425) break; // ONLY GENERATE RESULTS FOR FIRST HALF OF QUERIES FOR NOW
             String queryText = parts[1];
 
-            // Process and execute the query
+            // process queries
             processQuery(queryId, queryText, parser, isearcher, resultsWriter);
         }
-
-        // Close resources
         queryReader.close();
         resultsWriter.close();
         System.out.println("Batch search completed. Results written to: " + resultsPath);
     }
 
     private static void processQuery(int queryId, String queryText, QueryParser parser, IndexSearcher isearcher, BufferedWriter resultsWriter) throws IOException, ParseException {
-        // Escape query text to handle special characters
+        // escape query text to handle special characters
         String escapedQueryText = QueryParser.escape(queryText);
 
-        // Parse and execute the query
         Query query = parser.parse(escapedQueryText);
-        TopDocs topDocs = isearcher.search(query, 1000);  // Retrieve top n results
+        TopDocs topDocs = isearcher.search(query, 1000);  // Retrieve top 1000 results
 
         // Write results in TREC Eval format:
         // <query_id> Q0 <doc_id> <rank> <score> <run_name>
         int rank = 1;
+        String prevId = null;
         for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
             Document doc = isearcher.doc(scoreDoc.doc);
-            String docId = doc.get("docNo");  // Match the field in your current document structure
-            
+            String docId = doc.get("docNo");
+            if(docId.equals(prevId)) continue;
             String resultLine = String.format("%d Q0 %s %d %f lucene-v2\n", queryId, docId, rank, scoreDoc.score);
             resultsWriter.write(resultLine);
-
+            prevId = docId;
             rank++;
         }
     }

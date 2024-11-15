@@ -1,7 +1,10 @@
-/home/zia/Documents/Assignment 2/search-engine-2/src/main/java/com/example/DocumentParser.java
-/home/zia/Documents/Assignment 2/search-engine-2/src/main/java/com/example/ParsedDoc.java
-/home/zia/Documents/Assignment 2/search-engine-2/src/main/java/com/example/FtParse.java
-/home/zia/Documents/Assignment 2/search-engine-2/src/main/java/com/example/CreateIndex.java
-/home/zia/Documents/Assignment 2/search-engine-2/src/main/java/com/example/QueryIndex.java
-/home/zia/Documents/Assignment 2/search-engine-2/src/main/java/com/example/App.java
-/home/zia/Documents/Assignment 2/search-engine-2/src/main/java/com/example/Constants.java
+/home/azureuser/search-engine-2/src/main/java/com/example/ParsedDoc.java
+/home/azureuser/search-engine-2/src/main/java/com/example/QueryIndex.java
+/home/azureuser/search-engine-2/src/main/java/com/example/App.java
+/home/azureuser/search-engine-2/src/main/java/com/example/FbisParse.java
+/home/azureuser/search-engine-2/src/main/java/com/example/FtParse.java
+/home/azureuser/search-engine-2/src/main/java/com/example/CreateIndex.java
+/home/azureuser/search-engine-2/src/main/java/com/example/FrParse.java
+/home/azureuser/search-engine-2/src/main/java/com/example/DocumentParser.java
+/home/azureuser/search-engine-2/src/main/java/com/example/LaParse.java
+/home/azureuser/search-engine-2/src/main/java/com/example/Constants.java

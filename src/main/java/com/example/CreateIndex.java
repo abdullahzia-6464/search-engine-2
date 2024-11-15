@@ -17,7 +17,7 @@ import org.apache.lucene.store.FSDirectory;
 public class CreateIndex {
 
     public static void main(String[] args) throws IOException {
-        String analyzerType = args.length > 0 ? args[0] : "standard";  // Default to standard analyzer
+        String analyzerType = args.length > 0 ? args[0] : "standard";  // default is standard analyzer
 
         Analyzer analyzer = new StandardAnalyzer();
         if (analyzerType.equalsIgnoreCase("whitespace")) {
@@ -33,12 +33,14 @@ public class CreateIndex {
         config.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
         IndexWriter iwriter = new IndexWriter(directory, config);
 
-        // List to hold all document parsers
+        // list of parsers
         List<DocumentParser> parsers = new ArrayList<>();
         parsers.add(new FtParse());
-        //parsers.add(new LaParse()); // Adding LaParse, more can be added later
+        parsers.add(new LaParse());
+        parsers.add(new FrParse()); 
+        parsers.add(new FbisParse());
 
-        // Pass the IndexWriter to each parser
+        // pass IndexWriter to each parser
         for (DocumentParser parser : parsers) {
             parser.parse(iwriter);
         }
